@@ -4,13 +4,26 @@
  * In case of tie, returns 0.
  * If player 2 wins, returns a negative number equal to player 2's damage
  */
-fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: Int, doesP1goFirst: Boolean?): Int {
+fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: Int, doesP1goFirst: Boolean? = null,
+             p1StartOfCombatEffect: StartOfCombatEffect? = null, p2StartOfCombatEffect: StartOfCombatEffect? = null): Int {
     var p1board = p1board
     var p2board = p2board
     //if null, set to random boolean
     var isPlayer1Turn = doesP1goFirst ?: RAND.nextBoolean()
     var nextToAttackP1 = 1
     var nextToAttackP2 = 1
+
+    //TODO figure out how order is decided
+    if (p1StartOfCombatEffect != null) {
+        var boards = p1StartOfCombatEffect.trigger(p1board, p2board)
+        p1board = boards.first
+        p2board = boards.second
+    }
+    if (p2StartOfCombatEffect != null) {
+        var boards = p2StartOfCombatEffect.trigger(p2board, p1board)
+        p1board = boards.second
+        p2board = boards.first
+    }
 
     while (!(p1board.isEmpty() || p2board.isEmpty())) {
         var attackResult: Pair<Pair<BoardState, BoardState>, Pair<Int, Int>> = if (isPlayer1Turn) attack(p1board, p2board, nextToAttackP1, nextToAttackP2)
@@ -478,8 +491,151 @@ class DeathEffect {
     }
 }
 
-class StartOfCombatEffect {
+/**
+ * Friendly board state, opponent's board state
+ */
+//TODO figure out lots of special cases wrt these hero powers
+/* TODO
+For example: If Nefarian's hero power kills a replicating menace,
+it shouldn't also damage the microbots that come out. Make sure that doesn't happen.
 
+Also, for patches and ragnaros:
+If there are no minions, the hero powers should do nothing
+If there is 1 minion, the hero power should only deal damage once.
+ */
+class StartOfCombatEffect(var trigger: (BoardState, BoardState) -> Pair<BoardState, BoardState>) {
+    companion object {
+        var nefarianStartOfCombatEffect = StartOfCombatEffect { nefariansBoard: BoardState, opponentsBoard: BoardState ->
+            var newBoard = opponentsBoard
+            for (minion in newBoard.board) {
+                if (!minion.divineShield) {
+                    //TODO
+                } else {
+                    minion.divineShield = false
+                    //Bolvar
+                    for (m in newBoard.board) {
+                        if (m.type.lossOfDivineShieldEffect != null) {
+                            m.type.lossOfDivineShieldEffect!!.trigger(m)
+                        }
+                    }
+                }
+            }
+            Pair(nefariansBoard, newBoard)
+        }
+
+        var patchesStartOfCombatEffect = StartOfCombatEffect { patchesBoard: BoardState, opponentsBoard: BoardState ->
+            var newBoard = opponentsBoard
+            var numMinions = newBoard.numMinions()
+            var damageSlot1 = RAND.nextInt(numMinions) + 1
+            var damageSlot2 = RAND.nextInt(numMinions)
+            if (damageSlot2 >= damageSlot1) {
+                if (damageSlot2 == numMinions) {
+                    damageSlot2 = 1
+                } else {
+                    damageSlot2 += 1
+                }
+            }
+            if (damageSlot2 > damageSlot1) {
+                var temp = damageSlot1
+                damageSlot1 = damageSlot2
+                damageSlot2 = temp
+            }
+
+            var firstMinion = newBoard.get(damageSlot1)
+            if (!firstMinion.divineShield) {
+                //TODO
+            } else {
+                firstMinion.divineShield = false
+                //Bolvar
+                for (m in newBoard.board) {
+                    if (m.type.lossOfDivineShieldEffect != null) {
+                        m.type.lossOfDivineShieldEffect!!.trigger(m)
+                    }
+                }
+            }
+
+            var secondMinion = newBoard.get(damageSlot1)
+            if (!secondMinion.divineShield) {
+                //TODO
+            } else {
+                secondMinion.divineShield = false
+                //Bolvar
+                for (m in newBoard.board) {
+                    if (m.type.lossOfDivineShieldEffect != null) {
+                        m.type.lossOfDivineShieldEffect!!.trigger(m)
+                    }
+                }
+            }
+
+            Pair(patchesBoard, newBoard)
+        }
+
+        var professorPutricideStartOfCombatEffect = StartOfCombatEffect { putricidesBoard: BoardState, opponentsBoard: BoardState ->
+            var newBoard = putricidesBoard
+            if (putricidesBoard.numMinions() >= 1) {
+                var firstMinion = putricidesBoard.get(1)
+                firstMinion.attack += 10
+            }
+            Pair(newBoard, opponentsBoard)
+        }
+
+        var ragnarosStartOfCombatEffect = StartOfCombatEffect { ragnarosBoard: BoardState, opponentsBoard: BoardState ->
+            var newBoard = opponentsBoard
+            var numMinions = newBoard.numMinions()
+            var damageSlot1 = RAND.nextInt(numMinions) + 1
+            var damageSlot2 = RAND.nextInt(numMinions)
+            if (damageSlot2 >= damageSlot1) {
+                if (damageSlot2 == numMinions) {
+                    damageSlot2 = 1
+                } else {
+                    damageSlot2 += 1
+                }
+            }
+            if (damageSlot2 > damageSlot1) {
+                var temp = damageSlot1
+                damageSlot1 = damageSlot2
+                damageSlot2 = temp
+            }
+
+            var firstMinion = newBoard.get(damageSlot1)
+            if (!firstMinion.divineShield) {
+                //TODO
+            } else {
+                firstMinion.divineShield = false
+                //Bolvar
+                for (m in newBoard.board) {
+                    if (m.type.lossOfDivineShieldEffect != null) {
+                        m.type.lossOfDivineShieldEffect!!.trigger(m)
+                    }
+                }
+            }
+
+            var secondMinion = newBoard.get(damageSlot1)
+            if (!secondMinion.divineShield) {
+                //TODO
+            } else {
+                secondMinion.divineShield = false
+                //Bolvar
+                for (m in newBoard.board) {
+                    if (m.type.lossOfDivineShieldEffect != null) {
+                        m.type.lossOfDivineShieldEffect!!.trigger(m)
+                    }
+                }
+            }
+
+            Pair(ragnarosBoard, newBoard)
+        }
+
+        var theGreatAkazamzarakStartOfCombatEffect = StartOfCombatEffect { akazamzaraksBoard: BoardState, opponentsBoard: BoardState ->
+            //TODO
+            Pair(akazamzaraksBoard, opponentsBoard)
+        }
+
+        var theLichKingsStartOfCombatEffect = StartOfCombatEffect { lichKingsBoard: BoardState, opponentsBoard: BoardState ->
+            //TODO
+            Pair(lichKingsBoard, opponentsBoard)
+        }
+    }
 }
 
 class LossOfDivineShieldEffect(var trigger: ((BoardMinion) -> Unit)) {
