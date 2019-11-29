@@ -5,83 +5,24 @@
  * If player 2 wins, returns a negative number equal to player 2's damage
  */
 fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: Int, doesP1goFirst: Boolean?): Int {
+    var p1board = p1board
+    var p2board = p2board
     //if null, set to random boolean
     var isPlayer1Turn = doesP1goFirst ?: RAND.nextBoolean()
     var nextToAttackP1 = 1
     var nextToAttackP2 = 1
 
     while (!(p1board.isEmpty() || p2board.isEmpty())) {
-        if (isPlayer1Turn) {
-            var defenderSlot = RAND.nextInt(p2board.numMinions()) + 1
-            var attacker = p1board.get(nextToAttackP1)
-            var defender = p2board.get(defenderSlot)
-            if (!(attacker.divineShield)) {
-                attacker.health -= defender.attack
-            }
-            if (!(defender.divineShield)) {
-                defender.health -= attacker.attack
-            }
-            if (attacker.health <= 0) {
-                p1board.remove(nextToAttackP1)
-                if (nextToAttackP1 > p1board.numMinions()) {
-                    nextToAttackP1 = 1
-                }
-            } else {
-                if (nextToAttackP1 == p1board.numMinions()) {
-                    nextToAttackP1 = 1
-                } else {
-                    nextToAttackP1 += 1
-                }
-            }
-            if (defender.health <= 0) {
-                p2board.remove(defenderSlot)
-                if (nextToAttackP2 > p2board.numMinions()) {
-                    nextToAttackP2 = 1
-                }
-            } else {
-                if (nextToAttackP2 == p2board.numMinions()) {
-                    nextToAttackP2 = 1
-                } else {
-                    nextToAttackP2 += 1
-                }
-            }
-        } else {
-            var defenderSlot = RAND.nextInt(p1board.numMinions()) + 1
-            var attacker = p2board.get(nextToAttackP1)
-            var defender = p1board.get(defenderSlot)
-            if (!(attacker.divineShield)) {
-                attacker.health -= defender.attack
-            }
-            if (!(defender.divineShield)) {
-                defender.health -= attacker.attack
-            }
-            if (attacker.health <= 0) {
-                p1board.remove(nextToAttackP1)
-                if (nextToAttackP1 > p2board.numMinions()) {
-                    nextToAttackP1 = 1
-                }
-            } else {
-                if (nextToAttackP1 == p2board.numMinions()) {
-                    nextToAttackP1 = 1
-                } else {
-                    nextToAttackP1 += 1
-                }
-            }
-            if (defender.health <= 0) {
-                p2board.remove(defenderSlot)
-                if (nextToAttackP2 > p1board.numMinions()) {
-                    nextToAttackP2 = 1
-                }
-            } else {
-                if (nextToAttackP2 == p1board.numMinions()) {
-                    nextToAttackP2 = 1
-                } else {
-                    nextToAttackP2 += 1
-                }
-            }
-        }
+        var attackResult: Pair<Pair<BoardState, BoardState>, Pair<Int, Int>> = if (isPlayer1Turn) attack(p1board, p2board, nextToAttackP1, nextToAttackP2)
+                                                                               else attack(p2board, p1board, nextToAttackP2, nextToAttackP1)
+        p1board = if (isPlayer1Turn) attackResult.first.first else attackResult.first.second
+        p2board = if (isPlayer1Turn) attackResult.first.second else attackResult.first.first
+        nextToAttackP1 = if (isPlayer1Turn) attackResult.second.first else attackResult.second.second
+        nextToAttackP2 = if (isPlayer1Turn) attackResult.second.second else attackResult.second.first
+
         isPlayer1Turn = !isPlayer1Turn
     }
+
     // if both boards are empty, it's a tie, return 0
     if (p1board.isEmpty() && p2board.isEmpty()) {
         return 0
@@ -102,9 +43,54 @@ fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: In
     return (-1) * totalDamage
 }
 
-fun attack(attackerBoardState: BoardState, defenderBoardState: BoardState, attackingSlot: Int): Pair<BoardState, BoardState> {
-    //TODO
-    return Pair(attackerBoardState, defenderBoardState)
+/**
+ * Returns a pair of pairs:
+ *     Pair 1:
+ *         First: attackerBoardState after the attack
+ *         Second: defenderBoardState after the attack
+ *     Pair 2:
+ *         First: Attacking player's next attacking slot
+ *         Second: Defending player's next attacking slot
+ */
+fun attack(attackerBoard: BoardState, defenderBoard: BoardState, attackingSlot: Int, nextDefendingSlot: Int): Pair<Pair<BoardState, BoardState>, Pair<Int, Int>> {
+    var nextAttackingSlot = attackingSlot
+    var nextDefendingSlot = nextDefendingSlot
+
+    var defenderSlot = RAND.nextInt(defenderBoard.numMinions()) + 1
+    var attacker = attackerBoard.get(attackingSlot)
+    var defender = defenderBoard.get(defenderSlot)
+    if (!(attacker.divineShield)) {
+        attacker.health -= defender.attack
+    }
+    if (!(defender.divineShield)) {
+        defender.health -= attacker.attack
+    }
+    if (attacker.health <= 0) {
+        attackerBoard.remove(attackingSlot)
+        if (attackingSlot > attackerBoard.numMinions()) {
+            nextAttackingSlot = 1
+        }
+    } else {
+        if (attackingSlot == attackerBoard.numMinions()) {
+            nextAttackingSlot = 1
+        } else {
+            nextAttackingSlot += 1
+        }
+    }
+    if (defender.health <= 0) {
+        defenderBoard.remove(defenderSlot)
+        if (nextDefendingSlot > defenderBoard.numMinions()) {
+            nextDefendingSlot = 1
+        }
+    } else {
+        if (nextDefendingSlot == defenderBoard.numMinions()) {
+            nextDefendingSlot = 1
+        } else {
+            nextDefendingSlot += 1
+        }
+    }
+
+    return Pair(Pair(attackerBoard, defenderBoard), Pair(nextAttackingSlot, nextDefendingSlot))
 }
 
 val RAND = java.util.Random()

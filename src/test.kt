@@ -10,8 +10,20 @@ class MainClass {
         }
 
         fun test1(): Int {
-            var p1board = BoardState(BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1))
-            var p2board = BoardState(BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1), BoardMinion(3, 3, 1))
+            var p1board = BoardState(BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3))
+            var p2board = BoardState(BoardMinion(MinionType.foeReaper, 2, 100),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3),
+                BoardMinion(MinionType.foeReaper, 3, 3))
             return(simulate(p1board, p2board, 1, 1, true))
         }
     }
