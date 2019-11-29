@@ -61,9 +61,23 @@ fun attack(attackerBoard: BoardState, defenderBoard: BoardState, attackingSlot: 
     var defender = defenderBoard.get(defenderSlot)
     if (!(attacker.divineShield)) {
         attacker.health -= defender.attack
+    } else {
+        attacker.divineShield = false
+        // trigger any attacking Bolvars
+        for (minion in attackerBoard.board) {
+            if (minion.type.lossOfDivineShieldEffect != null) {
+                minion.type.lossOfDivineShieldEffect!!.trigger(minion)
+            }
+        }
     }
     if (!(defender.divineShield)) {
         defender.health -= attacker.attack
+        // trigger any defending Bolvars
+        for (minion in attackerBoard.board) {
+            if (minion.type.lossOfDivineShieldEffect != null) {
+                minion.type.lossOfDivineShieldEffect!!.trigger(minion)
+            }
+        }
     }
     if (attacker.health <= 0) {
         attackerBoard.remove(attackingSlot)
@@ -133,9 +147,9 @@ class BoardMinion(var type: MinionType, var attack: Int, var health: Int, var di
 
 class MinionType(val level: Int, var tribe: Tribe = Tribe.NONE, var deathrattle: Deathrattle? = null,
                  var aura: Aura? = null, var summonEffect: SummonEffect? = null, var attackEffect: AttackEffect? = null,
-                 var takesDamageEffect: TakesDamageEffect? = null, deathEffect: DeathEffect? = null,
-                 startOfCombatEffect: StartOfCombatEffect? = null, lossOfDivineShieldEffect: LossOfDivineShieldEffect? = null,
-                 anyFriendlyMinionAttacksEffect: AnyFriendlyMinionAttacksEffect? = null) {
+                 var takesDamageEffect: TakesDamageEffect? = null, var deathEffect: DeathEffect? = null,
+                 var startOfCombatEffect: StartOfCombatEffect? = null, var lossOfDivineShieldEffect: LossOfDivineShieldEffect? = null,
+                 var anyFriendlyMinionAttacksEffect: AnyFriendlyMinionAttacksEffect? = null) {
     companion object {
         var beastToken = MinionType(1, Tribe.BEAST)
         var demonToken = MinionType(1, Tribe.DEMON)
@@ -468,11 +482,16 @@ class StartOfCombatEffect {
 
 }
 
-class LossOfDivineShieldEffect {
-    companion object {
-        var bolvarFirebloodLossOfDivineShieldEffect = LossOfDivineShieldEffect()//TODO
+class LossOfDivineShieldEffect(var trigger: ((BoardMinion) -> Unit)) {
 
-        var goldBolvarFirebloodLossOfDivineShieldEffect = LossOfDivineShieldEffect()//TODO
+    companion object {
+        var bolvarFirebloodLossOfDivineShieldEffect = LossOfDivineShieldEffect { minion: BoardMinion ->
+            minion.attack += 2
+        }//TODO
+
+        var goldBolvarFirebloodLossOfDivineShieldEffect = LossOfDivineShieldEffect { minion: BoardMinion ->
+            minion.attack += 2
+        }//TODO
     }
 }
 
