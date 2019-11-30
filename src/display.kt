@@ -1,10 +1,16 @@
 import org.lwjgl.opengl.Display
 
-class CardSlot(var x: Int, var y: Int, card: BoardMinion) {
+class CardSlot(var x: Int, var y: Int, var card: BoardMinion?) {
 
 }
 
-class DisplayBoard(var p1Slots: Array<CardSlot>, var p2Slots: Array<CardSlot>) {
+class DisplayBoard(var p1Board: BoardState, var p2Board: BoardState) {
+    var p1Slots: Array<CardSlot> = Array(7) { i ->
+        CardSlot(0, 0, p1Board.get(i+1))
+    }
+    var p2Slots: Array<CardSlot> = Array(7) { i ->
+        CardSlot(0, 0, p2Board.get(i+1))
+    }
     init {
         val displayWidth = Display.getWidth()
         val displayHeight = Display.getHeight()
@@ -28,6 +34,43 @@ class DisplayBoard(var p1Slots: Array<CardSlot>, var p2Slots: Array<CardSlot>) {
             currentX += CARD_WIDTH + CARD_HORIZONTAL_SPACING
         }
     }
+    fun display() {
+        for (slot in p1Slots) {
+            if (slot.card != null) {
+                drawCard(slot.card!!, slot.x, slot.y)
+            }
+        }
+        for (slot in p2Slots) {
+            if (slot.card != null) {
+                drawCard(slot.card!!, slot.x, slot.y)
+            }
+        }
+    }
+
+    fun updateState(p1Board: BoardState, p2Board: BoardState) {
+        var i = 0
+        var numMinions = p1Board.numMinions()
+        while (i < numMinions) {
+            p1Slots[i].card = p1Board.get(i+1)
+            i += 1
+        }
+        while (i < 7) {
+            p1Slots[i].card = null
+            i += 1
+        }
+        i = 0
+        numMinions = p2Board.numMinions()
+        while (i < numMinions) {
+            p2Slots[i].card = p2Board.get(i+1)
+            i += 1
+        }
+        while (i < 7) {
+            p2Slots[i].card = null
+            i += 1
+        }
+    }
+
+
     companion object {
         const val CARD_WIDTH: Int = 150
         const val CARD_HEIGHT: Int = 150
