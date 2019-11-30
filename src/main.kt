@@ -26,8 +26,8 @@ fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: In
     }
 
     while (!(p1board.isEmpty() || p2board.isEmpty())) {
-        var attackResult: Pair<Pair<BoardState, BoardState>, Pair<Int, Int>> = if (isPlayer1Turn) attack(p1board, p2board, nextToAttackP1, nextToAttackP2)
-                                                                               else attack(p2board, p1board, nextToAttackP2, nextToAttackP1)
+        var attackResult: Pair<Pair<BoardState, BoardState>, Pair<Int, Int>> = if (isPlayer1Turn) attack(p1board, p2board, nextToAttackP1, nextToAttackP2, true)
+                                                                               else attack(p2board, p1board, nextToAttackP2, nextToAttackP1, false)
         p1board = if (isPlayer1Turn) attackResult.first.first else attackResult.first.second
         p2board = if (isPlayer1Turn) attackResult.first.second else attackResult.first.first
         nextToAttackP1 = if (isPlayer1Turn) attackResult.second.first else attackResult.second.second
@@ -38,6 +38,7 @@ fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: In
 
     // if both boards are empty, it's a tie, return 0
     if (p1board.isEmpty() && p2board.isEmpty()) {
+        println("Result: 0")
         return 0
     }
     // if only p2's board is empty, p1 wins, return a positive number equal to damage done
@@ -46,6 +47,7 @@ fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: In
         for (minion in p1board.board) {
             totalDamage += minion.type.level
         }
+        println("Result: $totalDamage")
         return totalDamage
     }
     // if only p1's board is empty, p2 wins, return a negative number equal to damage done
@@ -53,6 +55,7 @@ fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: In
     for (minion in p2board.board) {
         totalDamage += minion.type.level
     }
+    println("Result: " + ((-1) * totalDamage))
     return (-1) * totalDamage
 }
 
@@ -65,11 +68,18 @@ fun simulate(p1board: BoardState, p2board: BoardState, p1Level: Int, p2Level: In
  *         First: Attacking player's next attacking slot
  *         Second: Defending player's next attacking slot
  */
-fun attack(attackerBoard: BoardState, defenderBoard: BoardState, attackingSlot: Int, nextDefendingSlot: Int): Pair<Pair<BoardState, BoardState>, Pair<Int, Int>> {
+fun attack(attackerBoard: BoardState, defenderBoard: BoardState, attackingSlot: Int, nextDefendingSlot: Int, attackerIsP1: Boolean): Pair<Pair<BoardState, BoardState>, Pair<Int, Int>> {
     var nextAttackingSlot = attackingSlot
     var nextDefendingSlot = nextDefendingSlot
 
     var defenderSlot = RAND.nextInt(defenderBoard.numMinions()) + 1
+
+    if (attackerIsP1) {
+        MainClass.updateState(attackerBoard, defenderBoard, true, attackingSlot, defenderSlot)
+    } else {
+        MainClass.updateState(defenderBoard, attackerBoard, false, attackingSlot, defenderSlot)
+    }
+
     var attacker = attackerBoard.get(attackingSlot)
     var defender = defenderBoard.get(defenderSlot)
     if (!(attacker.divineShield)) {
