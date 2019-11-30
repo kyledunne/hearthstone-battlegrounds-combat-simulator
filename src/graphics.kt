@@ -3,6 +3,7 @@ import org.newdawn.slick.opengl.Texture
 import org.newdawn.slick.opengl.TextureLoader
 import org.newdawn.slick.util.ResourceLoader
 import java.awt.Font
+import org.newdawn.slick.TrueTypeFont
 
 fun drawCard(card: BoardMinion, x: Int, y: Int) {
 
@@ -12,16 +13,12 @@ fun drawImage(image: Image, x: Int, y: Int, w: Int, h: Int) {
     image.draw(x, y, w, h)
 }
 
-fun drawText(text: Text, x: Int, y: Int) {
-
+fun drawText(text: Text, x: Float, y: Float) {
+    text.draw(x, y)
 }
 
-fun drawTriangle(x1: Int, y1: Int, x2: Int, y2: Int, x3: Int, y3: Int, color: Color) { //TODO give color a default value
-
-}
-
-class Text(var string: String, var font: Font, var color: Color) { //TODO give font and color defaults
-
+fun drawTriangle(x1: Int, y1: Int, x2: Int, y2: Int, x3: Int, y3: Int, color: Color) {
+    color.drawTriangle(x1, y1, x2, y2, x3, y3)
 }
 
 class Image (texturePath: String, var backgroundColor: Color? = null, var bindingColor: Color? = null) {
@@ -193,6 +190,10 @@ class Color constructor(var r: Float, var g: Float, var b: Float, var a: Float =
         fun isCloserToBlack(color: Color): Boolean {
             return color.r + color.g + color.b < 1.5
         }
+
+        fun slickColor(color: Color): org.newdawn.slick.Color {
+            return org.newdawn.slick.Color(color.r, color.g, color.b, color.a)
+        }
     }
 
     fun draw(x: Int, y: Int, w: Int, h: Int) {
@@ -204,6 +205,41 @@ class Color constructor(var r: Float, var g: Float, var b: Float, var a: Float =
             GL11.glVertex2i(x + w, y + h)
             GL11.glVertex2i(x, y + h)
             GL11.glEnd()
+        }
+    }
+
+    fun drawTriangle(x1: Int, y1: Int, x2: Int, y2: Int, x3: Int, y3: Int) {
+        if (this.a > 0) {
+            glColor4f(this)
+            GL11.glBegin(GL11.GL_TRIANGLES)
+            GL11.glVertex2i(x1, y1)
+            GL11.glVertex2i(x2, y2)
+            GL11.glVertex2i(x3, y3)
+            GL11.glEnd()
+        }
+    }
+}
+
+class Text(var string: String, var font: Font = DEFAULT_FONT, var fontColor: Color = Color.BLACK) {
+    var ttFont = TrueTypeFont(font, true)
+
+    fun draw(x: Float, y: Float) {
+        GL11.glEnable(GL11.GL_TEXTURE_2D)
+        ttFont.drawString(x, y, string, Color.slickColor(fontColor))
+        GL11.glDisable(GL11.GL_TEXTURE_2D)
+    }
+
+    fun getWidth() = ttFont.getWidth(string).toFloat()
+
+    fun getHeight() = ttFont.getHeight(string).toFloat()
+
+    companion object {
+        val DEFAULT_FONT = Font("Verdana", 0, 18)
+        val DEFAULT_TTFONT = TrueTypeFont(DEFAULT_FONT, true)
+        const val DEFAULT_FONT_STYLE = "Verdana"
+
+        fun adjustedFont(font: Font, newSize: Int): Font {
+            return Font(font.fontName, font.style, newSize)
         }
     }
 }
