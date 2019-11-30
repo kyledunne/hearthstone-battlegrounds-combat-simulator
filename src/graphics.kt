@@ -6,7 +6,10 @@ import java.awt.Font
 import org.newdawn.slick.TrueTypeFont
 
 fun drawCard(card: BoardMinion, x: Int, y: Int) {
-
+    val w = DisplayBoard.CARD_WIDTH
+    val h = DisplayBoard.CARD_HEIGHT
+    var cardImage = Image(DisplayBoard.CARD_IMG_FOLDER + card.type.name + DisplayBoard.CARD_IMG_ENDING)
+    drawImage(cardImage, x, y, w, h)
 }
 
 fun drawImage(image: Image, x: Int, y: Int, w: Int, h: Int) {

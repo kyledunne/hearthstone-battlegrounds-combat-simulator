@@ -76,5 +76,8 @@ class DisplayBoard(var p1Board: BoardState, var p2Board: BoardState) {
         const val CARD_HEIGHT: Int = 150
         const val CARD_HORIZONTAL_SPACING = 50
         const val CARD_VERTICAL_SPACING = 200
+
+        const val CARD_IMG_FOLDER = "res/img/regular/"
+        const val CARD_IMG_ENDING = ".png"
     }
 }
