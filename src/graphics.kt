@@ -10,6 +10,28 @@ fun drawCard(card: BoardMinion, x: Int, y: Int) {
     val h = DisplayBoard.CARD_HEIGHT
     var cardImage = Image(DisplayBoard.CARD_IMG_FOLDER + card.type.name + DisplayBoard.CARD_IMG_ENDING)
     drawImage(cardImage, x, y, w, h)
+    if (card.divineShield) {
+        drawImage(DisplayBoard.DIVINE_SHIELD_IMG, x, y, w, h)
+    }
+    if (card.type.gold) {
+        drawImage(DisplayBoard.TRIPLE_IMG, x + ((DisplayBoard.CARD_WIDTH / 2) - (DisplayBoard.TRIPLE_SIZE / 2)),
+            y + DisplayBoard.CARD_HEIGHT, DisplayBoard.TRIPLE_SIZE,
+            DisplayBoard.TRIPLE_SIZE)
+    }
+    if (card.poisonous) {
+        drawImage(DisplayBoard.POISONOUS_IMG, x + ((DisplayBoard.CARD_WIDTH / 2) - (DisplayBoard.ICON_SIZE / 2)),
+            y + DisplayBoard.CARD_HEIGHT - DisplayBoard.ICON_SIZE, DisplayBoard.ICON_SIZE,
+            DisplayBoard.ICON_SIZE)
+    }
+    if (card.type.deathrattle != null) {
+        drawImage(DisplayBoard.DEATHRATTLE_IMG, x + ((DisplayBoard.CARD_WIDTH / 2) - (DisplayBoard.ICON_SIZE / 2)),
+            y + DisplayBoard.CARD_HEIGHT, DisplayBoard.ICON_SIZE,
+            DisplayBoard.ICON_SIZE)
+    }
+    var attackText = Text(card.attack.toString())
+    var healthText = Text(card.health.toString())
+    drawText(attackText, x+0f, y + DisplayBoard.CARD_HEIGHT - attackText.getHeight() - 3)
+    drawText(healthText, x+0f, y + DisplayBoard.CARD_HEIGHT - healthText.getHeight() - 3)
 }
 
 fun drawImage(image: Image, x: Int, y: Int, w: Int, h: Int) {

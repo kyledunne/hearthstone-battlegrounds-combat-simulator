@@ -77,7 +77,18 @@ class DisplayBoard(var p1Board: BoardState, var p2Board: BoardState) {
         const val CARD_HORIZONTAL_SPACING = 50
         const val CARD_VERTICAL_SPACING = 200
 
-        const val CARD_IMG_FOLDER = "res/img/regular/"
+        const val CARD_IMG_FOLDER = "res/img/cards/"
         const val CARD_IMG_ENDING = ".png"
+
+        const val EFFECT_IMG_FOLDER = "res/img/effects/"
+        const val EFFECT_IMG_ENDING = ".png"
+
+        const val ICON_SIZE = 64
+        const val TRIPLE_SIZE = 100
+
+        val POISONOUS_IMG = Image(EFFECT_IMG_FOLDER + "poisonous" + EFFECT_IMG_ENDING)
+        val DIVINE_SHIELD_IMG = Image(EFFECT_IMG_FOLDER + "divineShield" + EFFECT_IMG_ENDING)
+        val DEATHRATTLE_IMG = Image(EFFECT_IMG_FOLDER + "deathrattle" + EFFECT_IMG_ENDING)
+        val TRIPLE_IMG = Image(EFFECT_IMG_FOLDER + "triple" + EFFECT_IMG_ENDING)
     }
 }
